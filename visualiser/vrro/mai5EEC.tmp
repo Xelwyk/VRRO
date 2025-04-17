@@ -1,0 +1,36 @@
+[gd_scene load_steps=7 format=3 uid="uid://n0n6f1u1xhiv"]
+
+[ext_resource type="Material" uid="uid://dljktp2dyw3se" path="res://materials/point_material.tres" id="1_2fiua"]
+[ext_resource type="Script" path="res://scripts/pointcloud.gd" id="1_2ojba"]
+[ext_resource type="PackedScene" uid="uid://bs72ogkvdd7d6" path="res://addons/proto_controller/proto_controller.tscn" id="3_drtsn"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_2ghii"]
+
+[sub_resource type="Sky" id="Sky_vd2ug"]
+sky_material = SubResource("ProceduralSkyMaterial_2ghii")
+
+[sub_resource type="Environment" id="Environment_n7y7t"]
+background_mode = 2
+sky = SubResource("Sky_vd2ug")
+tonemap_mode = 2
+glow_enabled = true
+
+[node name="Node3D" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_n7y7t")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.751713, 0.415719, -0.511962, 0, 0.7763, 0.630364, 0.65949, -0.473853, 0.583555, -2.37932, 4.23643, 3.11116)
+shadow_enabled = true
+
+[node name="pointcloud" type="MeshInstance3D" parent="."]
+material_override = ExtResource("1_2fiua")
+script = ExtResource("1_2ojba")
+
+[node name="ProtoController" parent="." instance=ExtResource("3_drtsn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4.18843)
+has_gravity = false
+can_sprint = true
+
+[node name="HTTPRequest" type="HTTPRequest" parent="."]

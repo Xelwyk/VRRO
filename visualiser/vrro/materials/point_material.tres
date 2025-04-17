@@ -1,0 +1,7 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://dljktp2dyw3se"]
+
+[resource]
+vertex_color_use_as_albedo = true
+albedo_color = Color(1, 0, 0, 1)
+use_point_size = true
+point_size = 4.0

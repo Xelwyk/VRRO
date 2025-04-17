@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3 uid="uid://n0n6f1u1xhiv"]
+
+[ext_resource type="Material" uid="uid://dljktp2dyw3se" path="res://materials/point_material.tres" id="1_2fiua"]
+[ext_resource type="Script" path="res://scripts/pointcloud.gd" id="1_2ojba"]
+
+[sub_resource type="Environment" id="Environment_fwrpr"]
+
+[node name="Node3D" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_fwrpr")
+
+[node name="pointcloud" type="MeshInstance3D" parent="."]
+material_override = ExtResource("1_2fiua")
+script = ExtResource("1_2ojba")
+
+[node name="HTTPRequest" type="HTTPRequest" parent="."]
