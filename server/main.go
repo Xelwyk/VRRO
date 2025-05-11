@@ -7,7 +7,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"sync"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -15,14 +14,19 @@ import (
 func main() {
 	fmt.Println("Starting server")
 	const bufferSize = 500000000
-	points := LinkedPointList{nil, nil, 0, bufferSize, make(chan Point, bufferSize), sync.Mutex{}}
+	//points := LinkedPointList{nil, nil, 0, bufferSize, make(chan Vertex, bufferSize), sync.Mutex{}}
+	points := PointCloud{
+		buffer: make(chan IncomingVertex, bufferSize),
+		tree:   nil,
+	}
+	points.init()
 	camera := Vertex{}
-	go points.addFromChannel()
+	go points.adderLoop()
 	go intakeCloudPoints(&points, &camera)
 	serveCloudPoints(&points, &camera)
 }
 
-func serveCloudPoints(points *LinkedPointList, camera *Vertex) {
+func serveCloudPoints(points *PointCloud, camera *Vertex) {
 	fmt.Println("Starting HTTP server")
 	router := httprouter.New()
 	router.GET("/cloudpoints", handleCPServing(points))
@@ -30,17 +34,18 @@ func serveCloudPoints(points *LinkedPointList, camera *Vertex) {
 	log.Fatal(http.ListenAndServe(":8081", router))
 }
 
-func handleCPServing(points *LinkedPointList) httprouter.Handle {
+func handleCPServing(points *PointCloud) httprouter.Handle {
 	fmt.Println("Setting up handler")
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		//fmt.Println("Handling request")
-		points.Mu.Lock()
-		defer points.Mu.Unlock()
+		points.mutex.Lock()
+		defer points.mutex.Unlock()
 
 		var readyPoints []Vertex
 
-		for node := points.head; node != nil; node = node.next {
-			readyPoints = append(readyPoints, node.point.Coordinates)
+		kdPoints := points.tree.Points()
+		for _, p := range kdPoints {
+			readyPoints = append(readyPoints, Vertex{p.Dimension(0), p.Dimension(1), p.Dimension(2)})
 		}
 
 		jsonResponse, err := json.Marshal(readyPoints)
@@ -65,7 +70,7 @@ func handleCmanServing(camera *Vertex) httprouter.Handle {
 	}
 }
 
-func intakeCloudPoints(points *LinkedPointList, camera *Vertex) {
+func intakeCloudPoints(points *PointCloud, camera *Vertex) {
 	fmt.Println("Starting UDP server")
 	// Resolve the address to listen on
 	addr, err := net.ResolveUDPAddr("udp", ":8080")
@@ -97,6 +102,7 @@ func intakeCloudPoints(points *LinkedPointList, camera *Vertex) {
 			stringedBuffer = ""
 			continue
 		}
+
 		stringedBuffer += string(buffer[:n])
 		if stringedBuffer[len(stringedBuffer)-2] != ']' {
 			continue
@@ -124,11 +130,12 @@ func intakeCloudPoints(points *LinkedPointList, camera *Vertex) {
 				Z: newPointMap.(map[string]any)["z"].(float64),
 				//Confidence: newPointMap.(map[string]any)["c"].(float64),
 			}
-			points.buffer <- Point{
+			points.buffer <- IncomingVertex{
 				Camera:      *camera,
 				Coordinates: newPoint,
 			}
 		}
+		fmt.Println("Received and processed data")
 		stringedBuffer = ""
 	}
 }

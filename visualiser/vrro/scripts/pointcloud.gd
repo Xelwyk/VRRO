@@ -14,7 +14,6 @@ func _ready() -> void:
 	st.begin(Mesh.PRIMITIVE_POINTS)
 	http.request_completed.connect(self._cloud_request_completed)
 	
-
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	
@@ -39,16 +38,12 @@ func points_to_mesh(jsonPoints: String) -> void:
 	if newCloud == null:
 		return
 	
-	st.clear()
-	st.begin(Mesh.PRIMITIVE_POINTS)
+	#st.clear()
+	#st.begin(Mesh.PRIMITIVE_POINTS)
 	for newPoint in newCloud:
-		st.add_vertex(Vector3(newPoint.x, newPoint.y, newPoint.z))
+		st.add_vertex(Vector3(newPoint.X, newPoint.Y, newPoint.Z))
 
 	self.mesh = st.commit()
-
-func exorcise_phantoms(point) -> void:
-	print(self.mesh.get_faces())
-
 
 func download_cloudpoint() -> void:
 	ready_to_request = false

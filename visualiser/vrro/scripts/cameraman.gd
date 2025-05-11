@@ -25,7 +25,7 @@ func updateCameramanPose(jsonPoints: String) -> void:
 	var st = SurfaceTool.new()
 	
 	st.begin(Mesh.PRIMITIVE_POINTS)
-	st.add_vertex(Vector3(point.x, point.y, point.z))
+	st.add_vertex(Vector3(point.X, point.Y, point.Z))
 		
 	self.mesh = st.commit()
 	self.set_surface_override_material(0, cam_mat)
